@@ -7,8 +7,6 @@ import tkinter as tk
 top = tk.Tk()
 top.title("YDDict")
 
-YD_Dict=yd_dict.Dict_Yd()
-
 TopFrame=tk.Frame(top,width=60)
 WordEntry=tk.Entry(TopFrame,width=45)
 SearchBtn=tk.Button(TopFrame,text="Search",width=15)
@@ -16,11 +14,11 @@ SearchBtn=tk.Button(TopFrame,text="Search",width=15)
 ResultLabel=tk.Label(top,text='Nothing',height=15,width=65,bg='#FFFFDD',justify=tk.LEFT)
 
 def BtnCallback():
-	words=WordEntry.get()
-	
-	YD_Dict.GetWordInfo(YD_Dict.GetWebString(words))
-	out_string=YD_Dict.Result_Formate()
-	ResultLabel.configure(text=out_string,anchor=tk.NW)
+    words=WordEntry.get()
+    YD_Dict=yd_dict.Dict_Yd()
+    YD_Dict.GetWordInfo(YD_Dict.GetWebString(words))
+    out_string=YD_Dict.Result_Formate()
+    ResultLabel.configure(text=out_string,anchor=tk.NW)
 
 SearchBtn.configure(command=BtnCallback)
 

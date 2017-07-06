@@ -11,4 +11,17 @@ Of course the yd_dict.py can be used as a module by other py file.
 如果是使用GUI，请运行main_ui.py。
 当然yd_dict.py也可以当作一个模块被其他的py文件调用^_^。
 
+##使用介绍:
+* 命令行无参数
+* 命令行带参数
+* GUI模式
+
+###命令行无参数
+命令行无参数时，软件会提示输入查询的单词
+
+###命令行带参数
+命令行带参数时，参数即为查询的单词
+
+##GUI模式
+直接运行main_ui.py进入GUI模式，在文本框中输入单词，点击搜索即可查询翻译
 
