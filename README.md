@@ -17,6 +17,7 @@ Of course the yd_dict.py can be used as a module by other py file.
 * 命令行无参数
 * 命令行带参数
 * GUI模式
+* 汉译英
 
 ### 命令行无参数
 
@@ -36,3 +37,10 @@ Of course the yd_dict.py can be used as a module by other py file.
 
 ![](https://raw.githubusercontent.com/qiuzhiqian/yd_dict/master/doc/3.png)
 
+## 汉译英
+
+本词典支持汉译英和英译汉，前面的实例是英译汉的，下面演示汉译英
+
+![](https://raw.githubusercontent.com/qiuzhiqian/yd_dict/master/doc/4.png)
+
+![](https://raw.githubusercontent.com/qiuzhiqian/yd_dict/master/doc/5.png)
