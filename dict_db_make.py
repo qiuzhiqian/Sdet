@@ -8,7 +8,7 @@ import yd_dict
 
 YD_Dict=yd_dict.Dict_Yd()
 
-db_file=os.path.split(os.path.realpath(__file__))[0]+'\\script\\make_script.txt'
+db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/make_script.txt'
 file_obj=open(db_file,mode='r',encoding='UTF-8')
 fileLine=file_obj.readlines()
 
