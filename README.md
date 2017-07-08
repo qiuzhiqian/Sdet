@@ -63,4 +63,5 @@
 ![](https://raw.githubusercontent.com/qiuzhiqian/yd_dict/master/doc/6.png)
 
 如果你觉得我的软件对你有帮助，那就捐助我吧：
-<center>![](http://osrkwmsng.bkt.clouddn.com/Alipay.jpg)</center>
+
+![](http://osrkwmsng.bkt.clouddn.com/Alipay.jpg)
