@@ -6,7 +6,11 @@ import time
 import urllib.request
 import sys
 
+import yd_local
+
 class Dict_Yd:
+    priority=0      #搜索优先级,=0先本地搜索，本地失败然后网络搜索,=1不进行本地搜索，直接网络搜索
+    
     type=''
     keyword=''
     phonetic=[]
@@ -18,6 +22,8 @@ class Dict_Yd:
         self.Keyword_tag=r'<h2 class="wordbook-js">([\s\S]*?)<span class="keyword">([\s\S]*?)</span>([\s\S]*?)<div class="trans-container">'
         
         self.Content_tag=r'<div class="trans-container">([\s\S]*?)<div id="webTrans" class="trans-wrapper trans-tab">'
+        
+        self.db_obj=yd_local.Sql_operate()       #链接数据库
     
     def GetWebString(self,words):
         if (ord(list(words)[0]) not in range(97,122) and ord(list(words)[0]) not in range(65,90)):  #中转英
@@ -29,11 +35,15 @@ class Dict_Yd:
         ydurl=r'http://www.youdao.com/w/eng/'+words+'/#keyfrom=dict2.index'
         user_agent=r'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'
         headers = {'User-Agent':user_agent}
-        req = urllib.request.Request(ydurl, headers=headers)
-        Res = urllib.request.urlopen(req).read().decode('utf-8')
-        return Res
+        try:
+            req = urllib.request.Request(ydurl, headers=headers)
+            Res = urllib.request.urlopen(req).read().decode('utf-8')
+            return Res
+        except:
+            return ''
+        
     
-    def GetWordInfo(self,webString):
+    def GetWordWebInfo(self,webString):
         resultString=''
         keywordString=''
         contentString=''
@@ -42,6 +52,9 @@ class Dict_Yd:
         self.keyword=''
         self.phonetic=[]
         self.result=[]
+        
+        if(webString==''):
+            return
         
         resultString=re.search(self.Trans_yd_result,webString).group(0)
         keywordString=re.search(self.Keyword_tag,resultString).group(0)
@@ -68,7 +81,47 @@ class Dict_Yd:
                 for index in range(len(wordtypeList)):
                     self.result.append(re.sub(formate,'',wordtypeList[index])+'\t'+re.sub(formate,'',wordjsList[index]))
 
+    def GetWordLocalInfo(self,words):
+        self.type=''
+        self.keyword=''
+        self.phonetic=[]
+        self.result=[]
+        
+        if (ord(list(words)[0]) not in range(97,122) and ord(list(words)[0]) not in range(65,90)):  #中转英
+            self.type='C2E'
+            words=urllib.request.quote(words)
+        else:                                                                                       #英转中
+            self.type='E2C'
+        
+        word_list=self.db_obj.GetWord(self.type,words)            #数据库查询
+        
+        if(word_list==[]):
+            return -1
+            
+        word_result=word_list[0]
+        
+        self.keyword=word_result[1]
+        
+        for index in range(2):
+            if(word_result[2+index]!=None):
+                self.phonetic.append(word_result[2+index])
+            else:
+                break
+                
+        for index in range(5):
+            if(word_result[4+index]!=None):
+                self.result.append(word_result[4+index])
+            else:
+                break
+                
+        return 0
+        
+    def SaveLocalInfo(self):
+        self.db_obj.SetWord(self.type,self.keyword,self.phonetic,self.result)
+                    
     def Result_Formate(self):
+        if(self.keyword==''):
+            return 'Search Error'
         f_string="%s\n" %(self.keyword)
         if(len(self.phonetic)==2 and self.type=='E2C'):
             f_string=f_string+("英:%s\t美:%s" %(self.phonetic[0],self.phonetic[1]))
@@ -83,8 +136,6 @@ class Dict_Yd:
 
 if __name__=='__main__':
     words=''
-    
-    #print(len(sys.argv))
 
     if(len(sys.argv)<2):
         words=input("请输入单词:")
@@ -92,7 +143,20 @@ if __name__=='__main__':
         words=sys.argv[1]
 
     yds=Dict_Yd()
-    YDWebString=yds.GetWebString(words)
-    yds.GetWordInfo(YDWebString)
+    
+    if(yds.priority==0):
+        res=yds.GetWordLocalInfo(words)
+        if(res<0):          #本地查询无结果
+            YDWebString=yds.GetWebString(words)
+            yds.GetWordWebInfo(YDWebString)
+            yds.SaveLocalInfo()     #更新数据库
+            #print("******搜索结果来自网络******")
+        #else:
+            #print("******搜索结果来自本地******")
+    else:
+        YDWebString=yds.GetWebString(words)
+        yds.GetWordWebInfo(YDWebString)
+        #print("******搜索结果来自网络******")
+    
     out_string=yds.Result_Formate()
     print(out_string)

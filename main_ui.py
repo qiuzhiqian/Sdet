@@ -16,7 +16,15 @@ ResultLabel=tk.Label(top,text='Nothing',height=15,width=65,bg='#FFFFDD',justify=
 def BtnCallback():
     words=WordEntry.get()
     YD_Dict=yd_dict.Dict_Yd()
-    YD_Dict.GetWordInfo(YD_Dict.GetWebString(words))
+    if(YD_Dict.priority==0):
+        res=YD_Dict.GetWordLocalInfo(words)
+        if(res<0):          #本地查询无结果
+            YD_Dict.GetWordWebInfo(YD_Dict.GetWebString(words))
+            YD_Dict.SaveLocalInfo()     #更新数据库
+    else:
+        YDWebString=YD_Dict.GetWebString(words)
+        YD_Dict.GetWordWebInfo(YDWebString)
+    
     out_string=YD_Dict.Result_Formate()
     ResultLabel.configure(text=out_string,anchor=tk.NW)
 
