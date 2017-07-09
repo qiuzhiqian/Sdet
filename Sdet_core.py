@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#------------------------
+#Author:qiuzhiqian
+#Email:xia_mengliang@163.com
+#------------------------
+
 import re
 import time
 import urllib.request
 import sys
 
-import yd_local
+import Sdet_local
 
-class Dict_Yd:
+class Sdet_handle:
     priority=0      #搜索优先级,=0先本地搜索，本地失败然后网络搜索,=1不进行本地搜索，直接网络搜索
     
     type=''
@@ -23,7 +28,7 @@ class Dict_Yd:
         
         self.Content_tag=r'<div class="trans-container">([\s\S]*?)<div id="webTrans" class="trans-wrapper trans-tab">'
         
-        self.db_obj=yd_local.Sql_operate()       #链接数据库
+        self.db_obj=Sdet_local.Sql_operate()       #链接数据库
     
     def GetWebString(self,words):
         if (ord(list(words)[0]) not in range(97,122) and ord(list(words)[0]) not in range(65,90)):  #中转英
@@ -53,7 +58,7 @@ class Dict_Yd:
         self.phonetic=[]
         self.result=[]
         
-        if(webString==''):
+        if(webString=='' or self.result==[]):       #无法获取网页内容(网络有问题),或者搜索词语无结果(无效单词)
             return
         
         resultString=re.search(self.Trans_yd_result,webString).group(0)
@@ -142,21 +147,19 @@ if __name__=='__main__':
     else:
         words=sys.argv[1]
 
-    yds=Dict_Yd()
+    sdh=Sdet_handle()
     
-    if(yds.priority==0):
-        res=yds.GetWordLocalInfo(words)
+    if(sdh.priority==0):
+        res=sdh.GetWordLocalInfo(words)
         if(res<0):          #本地查询无结果
-            YDWebString=yds.GetWebString(words)
-            yds.GetWordWebInfo(YDWebString)
-            yds.SaveLocalInfo()     #更新数据库
+            sdh.GetWordWebInfo(sdh.GetWebString(words))
+            sdh.SaveLocalInfo()     #更新数据库
             #print("******搜索结果来自网络******")
         #else:
             #print("******搜索结果来自本地******")
     else:
-        YDWebString=yds.GetWebString(words)
-        yds.GetWordWebInfo(YDWebString)
+        sdh.GetWordWebInfo(sdh.GetWebString(words))
         #print("******搜索结果来自网络******")
     
-    out_string=yds.Result_Formate()
+    out_string=sdh.Result_Formate()
     print(out_string)

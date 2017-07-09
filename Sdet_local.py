@@ -1,12 +1,17 @@
 #!/usr/bin/env python
-# coding = utf-8  
+# -*- coding: utf-8 -*-
+
+#------------------------
+#Author:qiuzhiqian
+#Email:xia_mengliang@163.com
+#------------------------
 
 import os
 import sqlite3
 
 class Sql_operate():
     def __init__(self):
-        db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/wordDB.db'
+        db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/Sdet_wordDB.db'
         # 连接到SQLite数据库
         # 数据库文件是test.db
         # 如果文件不存在，会自动在当前目录创建:

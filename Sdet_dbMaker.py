@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#------------------------
+#Author:qiuzhiqian
+#Email:xia_mengliang@163.com
+#------------------------
+
 import re
 import os
 
-import yd_dict
+import Sdet_core
 
-YD_Dict=yd_dict.Dict_Yd()
+sdh=Sdet_core.Sdet_handle()
 
-db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/make_script.txt'
+db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/Sdet_dbIndex.txt'
 file_obj=open(db_file,mode='r',encoding='UTF-8')
 fileLine=file_obj.readlines()
 
@@ -19,10 +24,9 @@ for index in range(lineLen):
     #print(line)
     words=re.search(reg_cmd,fileLine[index]).group(0)
     
-    res=YD_Dict.GetWordLocalInfo(words)
+    res=sdh.GetWordLocalInfo(words)
     if(res<0):          #本地查询无结果
         print("[%d/%d]:%s" %(index,lineLen,words))
-        YDWebString=YD_Dict.GetWebString(words)
-        YD_Dict.GetWordWebInfo(YDWebString)
-        YD_Dict.SaveLocalInfo()     #更新数据库
+        sdh.GetWordWebInfo(sdh.GetWebString(words))
+        sdh.SaveLocalInfo()     #更新数据库
 
