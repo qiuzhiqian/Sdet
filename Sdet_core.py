@@ -58,7 +58,7 @@ class Sdet_handle:
         self.phonetic=[]
         self.result=[]
         
-        if(webString=='' or self.result==[]):       #无法获取网页内容(网络有问题),或者搜索词语无结果(无效单词)
+        if(webString==''):       #无法获取网页内容(网络有问题)
             return
         
         resultString=re.search(self.Trans_yd_result,webString).group(0)
@@ -82,9 +82,13 @@ class Sdet_handle:
             jsStringList=re.findall(r'<p class="wordGroup">[\s\S]*?</span>\s*?</p>',contentString)
             for item in jsStringList:
                 wordtypeList=re.findall(r'<span style="font-weight[\s\S]*?</span>',item)
+                wordtypeLen=len(wordtypeList)
                 wordjsList=re.findall(r'<a class="search-js" href=[\s\S]*?</a>',item)
-                for index in range(len(wordtypeList)):
-                    self.result.append(re.sub(formate,'',wordtypeList[index])+'\t'+re.sub(formate,'',wordjsList[index]))
+                for index in range(len(wordjsList)):
+                    if(index<wordtypeLen):
+                        self.result.append(re.sub(formate,'',wordtypeList[index])+'\t'+re.sub(formate,'',wordjsList[index]))
+                    else:
+                        self.result.append(re.sub(formate,'',wordjsList[index]))
 
     def GetWordLocalInfo(self,words):
         self.type=''
@@ -125,7 +129,7 @@ class Sdet_handle:
         self.db_obj.SetWord(self.type,self.keyword,self.phonetic,self.result)
                     
     def Result_Formate(self):
-        if(self.keyword==''):
+        if(self.keyword=='' or self.result==[]):        #网络有问题或者单词无有效解释
             return 'Search Error'
         f_string="%s\n" %(self.keyword)
         if(len(self.phonetic)==2 and self.type=='E2C'):
@@ -138,6 +142,9 @@ class Sdet_handle:
             for index in range(len(self.result)):
                 f_string=f_string+("\t%d: %s\n" %(index+1,self.result[index]))
         return f_string
+        
+    def DB_Reset(self,nums):                 #数据库恢复
+        self.db_obj.DBReset(nums)
 
 if __name__=='__main__':
     words=''
