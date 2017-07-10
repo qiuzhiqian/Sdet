@@ -14,6 +14,17 @@ import sys
 import Sdet_local
 
 class Sdet_handle:
+    banner=r"""
+ ____        __          __      
+/\  _`\     /\ \        /\ \__   
+\ \,\L\_\   \_\ \     __\ \ ,_\  
+ \/_\__ \   /'_` \  /'__`\ \ \/  
+   /\ \L\ \/\ \L\ \/\  __/\ \ \_ 
+   \ `\____\ \___,_\ \____\\ \__\
+    \/_____/\/__,_ /\/____/ \/__/"""
+    
+    version='1.0.0'
+    
     priority=0      #搜索优先级,=0先本地搜索，本地失败然后网络搜索,=1不进行本地搜索，直接网络搜索
     
     type=''
@@ -146,15 +157,19 @@ class Sdet_handle:
     def DB_Reset(self,nums):                 #数据库恢复
         self.db_obj.DBReset(nums)
 
-if __name__=='__main__':
+def main():
     words=''
 
+    sdh=Sdet_handle()
+    
     if(len(sys.argv)<2):
         words=input("请输入单词:")
+    elif(sys.argv[1]=='-h' or sys.argv[1]=='--help' or sys.argv[1]=='-v' or sys.argv[1]=='--version' ):
+        print(sdh.banner)
+        print("\nversion:%s" %sdh.version)
+        return
     else:
         words=sys.argv[1]
-
-    sdh=Sdet_handle()
     
     if(sdh.priority==0):
         res=sdh.GetWordLocalInfo(words)
@@ -170,3 +185,6 @@ if __name__=='__main__':
     
     out_string=sdh.Result_Formate()
     print(out_string)
+
+if __name__=='__main__':
+    main()
