@@ -1,12 +1,17 @@
 #!/usr/bin/env python
-# coding = utf-8  
+# -*- coding: utf-8 -*-
+
+#------------------------
+#Author:qiuzhiqian
+#Email:xia_mengliang@163.com
+#------------------------
 
 import os
 import sqlite3
 
 class Sql_operate():
     def __init__(self):
-        db_file=os.path.split(os.path.realpath(__file__))[0]+'\\script\\wordDB.db'
+        db_file=os.path.split(os.path.realpath(__file__))[0]+'/script/Sdet_wordDB.db'
         # 连接到SQLite数据库
         # 数据库文件是test.db
         # 如果文件不存在，会自动在当前目录创建:
@@ -15,10 +20,10 @@ class Sql_operate():
         self.cursor = self.conn.cursor()
         
         # 执行一条SQL语句，创建Ewordmap表:
-        self.cursor.execute('create table if not exists Ewordmap (id varchar(20) primary key,name varchar(20),pronounce1 varchar(10),pronounce2 varchar(10),result1 varchar(40),result2 varchar(40),result3 varchar(40),result4 varchar(40),result5 varchar(40))')
+        self.cursor.execute('create table if not exists Ewordmap (id integer primary key,name varchar(20),pronounce1 varchar(10),pronounce2 varchar(10),result1 varchar(40),result2 varchar(40),result3 varchar(40),result4 varchar(40),result5 varchar(40))')
         
         # 执行一条SQL语句，创建Cwordmap表:
-        self.cursor.execute('create table if not exists Cwordmap (id varchar(20) primary key,name varchar(20),pronounce1 varchar(10),pronounce2 varchar(10),result1 varchar(40),result2 varchar(40),result3 varchar(40),result4 varchar(40),result5 varchar(40))')
+        self.cursor.execute('create table if not exists Cwordmap (id integer primary key,name varchar(20),pronounce1 varchar(10),pronounce2 varchar(10),result1 varchar(40),result2 varchar(40),result3 varchar(40),result4 varchar(40),result5 varchar(40))')
         
             
     def __del__(self):
@@ -71,6 +76,30 @@ class Sql_operate():
         values = self.cursor.fetchall()
         #print(values)
         return values
+        
+    def DBReset(self,nums):      #恢复默认数据库
+        #Ewordmap
+        sql_cmd=r'select id from Ewordmap'
+        self.cursor.execute(sql_cmd)
+        # 获得查询结果集:
+        values = self.cursor.fetchall()
+        itemlen=len(values)
+        print("Ewordmap Len=%d" %itemlen)
+        if(itemlen>nums):
+            for index in range(nums+1,itemlen+1):
+                sql_cmd=r'delete from Ewordmap where id=%d' %(index)
+                self.cursor.execute(sql_cmd)
+            
+        #Cwordmap
+        sql_cmd=r'select id from Cwordmap'
+        self.cursor.execute(sql_cmd)
+        # 获得查询结果集:
+        values = self.cursor.fetchall()
+        itemlen=len(values)
+        if(itemlen>0):
+            for index in range(itemlen+1):
+                sql_cmd=r'delete from Cwordmap where id=%d' %(index)
+                self.cursor.execute(sql_cmd)
 
 
 if __name__=='__main__':

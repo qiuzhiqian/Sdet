@@ -1,14 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#------------------------
+#Author:qiuzhiqian
+#Email:xia_mengliang@163.com
+#------------------------
+
 import re
 import time
 import urllib.request
 import sys
 
-import yd_local
+import Sdet_local
 
-class Dict_Yd:
+class Sdet_handle:
+    banner=r"""
+ ____        __          __      
+/\  _`\     /\ \        /\ \__   
+\ \,\L\_\   \_\ \     __\ \ ,_\  
+ \/_\__ \   /'_` \  /'__`\ \ \/  
+   /\ \L\ \/\ \L\ \/\  __/\ \ \_ 
+   \ `\____\ \___,_\ \____\\ \__\
+    \/_____/\/__,_ /\/____/ \/__/"""
+    
+    version='1.0.0'
+    
     priority=0      #搜索优先级,=0先本地搜索，本地失败然后网络搜索,=1不进行本地搜索，直接网络搜索
     
     type=''
@@ -23,7 +39,7 @@ class Dict_Yd:
         
         self.Content_tag=r'<div class="trans-container">([\s\S]*?)<div id="webTrans" class="trans-wrapper trans-tab">'
         
-        self.db_obj=yd_local.Sql_operate()       #链接数据库
+        self.db_obj=Sdet_local.Sql_operate()       #链接数据库
     
     def GetWebString(self,words):
         if (ord(list(words)[0]) not in range(97,122) and ord(list(words)[0]) not in range(65,90)):  #中转英
@@ -53,7 +69,7 @@ class Dict_Yd:
         self.phonetic=[]
         self.result=[]
         
-        if(webString==''):
+        if(webString==''):       #无法获取网页内容(网络有问题)
             return
         
         resultString=re.search(self.Trans_yd_result,webString).group(0)
@@ -77,9 +93,13 @@ class Dict_Yd:
             jsStringList=re.findall(r'<p class="wordGroup">[\s\S]*?</span>\s*?</p>',contentString)
             for item in jsStringList:
                 wordtypeList=re.findall(r'<span style="font-weight[\s\S]*?</span>',item)
+                wordtypeLen=len(wordtypeList)
                 wordjsList=re.findall(r'<a class="search-js" href=[\s\S]*?</a>',item)
-                for index in range(len(wordtypeList)):
-                    self.result.append(re.sub(formate,'',wordtypeList[index])+'\t'+re.sub(formate,'',wordjsList[index]))
+                for index in range(len(wordjsList)):
+                    if(index<wordtypeLen):
+                        self.result.append(re.sub(formate,'',wordtypeList[index])+'\t'+re.sub(formate,'',wordjsList[index]))
+                    else:
+                        self.result.append(re.sub(formate,'',wordjsList[index]))
 
     def GetWordLocalInfo(self,words):
         self.type=''
@@ -120,7 +140,7 @@ class Dict_Yd:
         self.db_obj.SetWord(self.type,self.keyword,self.phonetic,self.result)
                     
     def Result_Formate(self):
-        if(self.keyword==''):
+        if(self.keyword=='' or self.result==[]):        #网络有问题或者单词无有效解释
             return 'Search Error'
         f_string="%s\n" %(self.keyword)
         if(len(self.phonetic)==2 and self.type=='E2C'):
@@ -133,30 +153,38 @@ class Dict_Yd:
             for index in range(len(self.result)):
                 f_string=f_string+("\t%d: %s\n" %(index+1,self.result[index]))
         return f_string
+        
+    def DB_Reset(self,nums):                 #数据库恢复
+        self.db_obj.DBReset(nums)
 
-if __name__=='__main__':
+def main():
     words=''
 
+    sdh=Sdet_handle()
+    
     if(len(sys.argv)<2):
         words=input("请输入单词:")
+    elif(sys.argv[1]=='-h' or sys.argv[1]=='--help' or sys.argv[1]=='-v' or sys.argv[1]=='--version' ):
+        print(sdh.banner)
+        print("\nversion:%s" %sdh.version)
+        return
     else:
         words=sys.argv[1]
-
-    yds=Dict_Yd()
     
-    if(yds.priority==0):
-        res=yds.GetWordLocalInfo(words)
+    if(sdh.priority==0):
+        res=sdh.GetWordLocalInfo(words)
         if(res<0):          #本地查询无结果
-            YDWebString=yds.GetWebString(words)
-            yds.GetWordWebInfo(YDWebString)
-            yds.SaveLocalInfo()     #更新数据库
+            sdh.GetWordWebInfo(sdh.GetWebString(words))
+            sdh.SaveLocalInfo()     #更新数据库
             #print("******搜索结果来自网络******")
         #else:
             #print("******搜索结果来自本地******")
     else:
-        YDWebString=yds.GetWebString(words)
-        yds.GetWordWebInfo(YDWebString)
+        sdh.GetWordWebInfo(sdh.GetWebString(words))
         #print("******搜索结果来自网络******")
     
-    out_string=yds.Result_Formate()
+    out_string=sdh.Result_Formate()
     print(out_string)
+
+if __name__=='__main__':
+    main()
